@@ -78,7 +78,13 @@ func DumpRequest(req *Request) ([]byte, error) {
 		}
 
 		httpReqStr += string(b)
-		replaceRequestURIWithActualURL(&httpReqStr, req.HTTPRequest.URL.EscapedPath(), req.HTTPRequest.URL.String())
+
+		var sb strings.Builder
+		sb.WriteString("HEHEHE")
+		sb.WriteString(httpReqStr[0:3])
+		sb.WriteString("muh-url")
+		httpReqStr = sb.String()
+		//replaceRequestURIWithActualURL(&httpReqStr, req.HTTPRequest.URL.EscapedPath(), req.HTTPRequest.URL.String())
 
 		if req.Method == MethodREQMOD {
 			if req.previewSet {
