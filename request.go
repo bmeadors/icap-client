@@ -2,6 +2,7 @@ package icapclient
 
 import (
 	"context"
+	"errors"
 	"fmt"
 	"net/http"
 	"net/http/httputil"
@@ -79,22 +80,23 @@ func DumpRequest(req *Request) ([]byte, error) {
 
 		httpReqStr += string(b)
 
-		var sb strings.Builder
-		//sb.Grow(len(httpReqStr) + h
-		i := strings.Index(httpReqStr, " ")
-		if i == -1 {
+		// Find end of request line
+		e := 0
+		for i := 0; i < len(httpReqStr); i++ {
+			if httpReqStr[i] == '\r' || httpReqStr[i] == '\n' {
+				e = i
+				break
+			}
 		}
-		sb.WriteString(httpReqStr[0:i])
 
-		sb.WriteString(req.HTTPRequest.URL.String())
-
-		i = strings.Index(httpReqStr[i:], " ")
-		if i == -1 {
+		// Split request line
+		toks := strings.Split(httpReqStr[:e], " ")
+		if len(toks) != 3 {
+			return nil, errors.New("invalid request line")
 		}
-		sb.WriteString(httpReqStr[i+1:])
 
-		httpReqStr = sb.String()
-		//replaceRequestURIWithActualURL(&httpReqStr, req.HTTPRequest.URL.EscapedPath(), req.HTTPRequest.URL.String())
+		// Replace request line
+		httpReqStr = toks[0] + " " + req.HTTPRequest.URL.String() + " " + toks[2] + httpReqStr[e:]
 
 		if req.Method == MethodREQMOD {
 			if req.previewSet {
